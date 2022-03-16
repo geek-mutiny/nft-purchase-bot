@@ -21,7 +21,13 @@ contract Parent is Ownable{
      address payable reciever;
      uint public mintAmount;
      address mintAddress;
-     bytes32 mintMethod;
+     uint mintCost;
+      constructor(address _mintAddress,uint _mintAmount, uint _mintCost, address payable _reciever){
+       mintAddress = _mintAddress;
+       reciever = _reciever;
+       mintAmount = _mintAmount;
+       mintCost = _mintCost;
+    }
 
      fallback() payable external {}
 
@@ -33,12 +39,36 @@ contract Parent is Ownable{
          _reciever = reciever;
      }
 
+     function setMintAmount(uint _mintAmount) external onlyOwner {
+         mintAmount = _mintAmount;
+     }
+
+     function getMintAmount() external view returns(uint _mintAmount){
+         _mintAmount = mintAmount;
+     }
+
+     function setMintCost(uint _mintCost) external onlyOwner {
+         mintCost = _mintCost;
+     }
+
+     function getMintCost() external view returns(uint _mintCost){
+         _mintCost = mintCost;
+     }
+
+     function setMintAddress(address _mintAddress) external onlyOwner {
+         mintAddress = _mintAddress;
+     }
+
+     function getMintAddress() external view returns(address _mintAddress){
+         _mintAddress = mintAddress;
+     }
+
     event ChildCreated(address childAddress);
     event TransferEther(address childAddress,uint cost);
 
-     function createChild(uint nums) external{
+     function createChild(uint nums) external onlyOwner{
          for(uint i=0;i<nums; i++){
-       Child child = new Child(mintAddress, mintAmount, reciever);  
+       Child child = new Child(mintAddress, mintAmount, mintCost, reciever);  
        children.push(child);
        emit ChildCreated(address(child));
        }
@@ -62,12 +92,7 @@ contract Parent is Ownable{
        }
      }
 
-     function tranferAllToReciever() external onlyOwner  {
-         for(uint i=0;i<children.length; i++){
-             children[i].transferToDad();
-       }
-     } 
-
+    
      function destroyAllChilds() external onlyOwner   {
          for(uint i=0;i<children.length; i++){
              children[i].destroyContract();
