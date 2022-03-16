@@ -15,18 +15,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 pragma solidity >=0.4.22 <0.9.0;
 contract Child is Ownable, IERC721Receiver{
     address mintAddress;
-    address reciever;  
+    address reciever; 
+    uint mintCost = 10000 gwei;
     uint mintAmount;  // num of mint for each address
-  //  bytes32 method;  // string of called method
-    uint256[] tokenIds;
     IERC721 public parentNFT;
-    constructor(address _mintAddress,uint _mintAmount, address _reciever){
-    //, bytes32 _method){
+    constructor(address _mintAddress,uint _mintAmount, uint _mintCost, address _reciever){
        mintAddress = _mintAddress;
        reciever = _reciever;
        mintAmount = _mintAmount;
        parentNFT = IERC721(_mintAddress); 
-   //    method = _method;
     }
 
     fallback() payable external {}
@@ -35,24 +32,30 @@ contract Child is Ownable, IERC721Receiver{
         address operator, 
         address from, 
         uint256 tokenId, 
-        bytes calldata data) external override returns (bytes4) {   
-        tokenIds.push(tokenId);
-        return IERC721Receiver.onERC721Received.selector;
+        bytes calldata data)  public virtual override returns (bytes4) {   
+        return this.onERC721Received.selector;
+        
     } 
 
-    function getTokens() external view returns(uint256[] memory _tokens){
-       _tokens = tokenIds;
-     }  
+event BuyMint(bool status, bytes result);
+    
+    function buyMint() 
+    external
+    payable onlyOwner
+{
+    bool status;
+    bytes memory result;
+    //change this line depending on the contract being called
+   // (bool success, bytes memory returnData) = mintAddress.call{value:mintCost, gas: 3000000}(abi.encodeWithSignature("mint(uint256)", mintAmount));
+    (bool success, bytes memory returnData) = mintAddress.call{value:mintCost, gas: 3000000}(abi.encodeWithSignature("mint()")); 
+     
+    emit BuyMint(success, returnData);
+ 
+}
 
-    function buyMint() external onlyOwner {
-        bool status;
-        bytes memory result;
-        (status, result) = mintAddress.delegatecall(abi.encodePacked(bytes4(keccak256("mint(uint256)")), mintAmount));
-    }
-
-    function transferToDad() external onlyOwner {
-          for(uint i=0;i<tokenIds.length; i++){
-             parentNFT.transferFrom(address(this), reciever, tokenIds[i]);
+    function transferToDad(uint256[] memory _ids) external onlyOwner {
+          for(uint i=0;i<_ids.length; i++){
+             parentNFT.transferFrom(address(this), reciever, i);
        }
     }
 
