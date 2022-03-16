@@ -92,6 +92,14 @@ contract Parent is Ownable{
        }
      }
 
+    function resendMints(address _childAddress, uint256[] memory _tokenIds) external onlyOwner   {
+          for (uint i = 0; i < children.length; i++) {
+      if (address(children[i]) == _childAddress) {         
+          children[i].transferToDad(_tokenIds);
+          }           
+        }
+      }
+
     
      function destroyAllChilds() external onlyOwner   {
          for(uint i=0;i<children.length; i++){
