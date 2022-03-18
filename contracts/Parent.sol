@@ -22,7 +22,7 @@ contract Parent is Ownable{
      uint public mintAmount;
      address mintAddress;
      uint mintCost;
-      constructor(address _mintAddress,uint _mintAmount, uint _mintCost, address payable _reciever){
+      constructor(address _mintAddress,uint _mintAmount,uint _mintCost, address payable _reciever){
        mintAddress = _mintAddress;
        reciever = _reciever;
        mintAmount = _mintAmount;
@@ -47,13 +47,13 @@ contract Parent is Ownable{
          _mintAmount = mintAmount;
      }
 
-     function setMintCost(uint _mintCost) external onlyOwner {
+    function setMintCost(uint _mintCost) external onlyOwner {
          mintCost = _mintCost;
      }
 
      function getMintCost() external view returns(uint _mintCost){
          _mintCost = mintCost;
-     }
+     } 
 
      function setMintAddress(address _mintAddress) external onlyOwner {
          mintAddress = _mintAddress;
@@ -92,11 +92,12 @@ contract Parent is Ownable{
        }
      }
 
-    function resendMints(address _childAddress, uint256[] memory _tokenIds) external onlyOwner   {
+    function resendMints(address _childAddress, uint256 _tokenId) external onlyOwner   {
           for (uint i = 0; i < children.length; i++) {
-      if (address(children[i]) == _childAddress) {         
-          children[i].transferToDad(_tokenIds);
-          }           
+      if (address(children[i]) == _childAddress) {     
+          children[i].transferToDad(_tokenId);
+                 
+          }     
         }
       }
 
@@ -107,4 +108,9 @@ contract Parent is Ownable{
        }
        delete children;
      }
+
+      function destroyContract() external onlyOwner {
+        address payable addr = payable(reciever);
+        selfdestruct(addr);
+  }
  }
