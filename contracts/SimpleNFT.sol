@@ -20,7 +20,7 @@ contract NFT is ERC721Enumerable, Ownable {
 
     string baseURI;
     string public baseExtension = ".json";
-    uint256 public cost = 10000 gwei;
+    uint256 public cost = 1 gwei;
     uint256 public maxSupply = 20;
 
     constructor(
@@ -44,8 +44,9 @@ contract NFT is ERC721Enumerable, Ownable {
         if (msg.sender != owner()) {
             require(msg.value >= cost);
         }
-
+     
         _safeMint(msg.sender, supply + 1);
+        //_setApprovalForAll(address(this), msg.sender, true);
     }
 
     function walletOfOwner(address _owner)
